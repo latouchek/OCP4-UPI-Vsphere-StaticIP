@@ -85,8 +85,8 @@ export ocp_net_dns="192.168.124.235"
 
 ```
 ### Create ignition files
-
-Because bootstrap ignition is too big, it needs to be placed on a webserver and downloaded during the first boot. To acheve that, we create bootstrap-append.ign that points to the right file
+Modify install-config.yaml according to your needs.
+Because bootstrap ignition is too big, it needs to be placed on a webserver and downloaded during the first boot. To achieve that, we create bootstrap-append.ign that points to the right file
  ```bash
  rm -f /var/www/html/ignition/*.ign
  rm -rf ${MYPATH}/openshift-install
