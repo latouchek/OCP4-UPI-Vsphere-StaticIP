@@ -13,34 +13,34 @@ In the first part we will use govc,an open source command-line utility for perfo
 
 
 
-* Prequisites
- * DNS, Loadbalancer and Webserver
+## Prequisites:
+### DNS, Loadbalancer and Webserver
 
-   Use the provided templates in files folder to configure the required services
-   ```bash
-    dnf install -y named httpd haproxy
-    mkdir -p  /var/www/html/ignition
-   ```
+Use the provided templates in files folder to configure the required services
+```bash
+dnf install -y named httpd haproxy
+mkdir -p  /var/www/html/ignition
+```
 
- * Download necessary binaries
+### Download necessary binaries
 
-   We need to install govc client, oc client and ocp installer and Terraform. This is how we proceed
-   ```bash
-   wget https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest-4.7/openshift-client-linux.tar.gz
-   wget https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest-4.7/openshift-install-linux.tar.gz
-   wget https://github.com/vmware/govmomi/releases/download/v0.24.0/govc_linux_amd64.gz
-   tar zxvf openshift-client-linux.tar.gz
-   tar zxvf openshift-install-linux.tar.gz
-   gunzip govc_linux_amd64.gz
-   rm -f *gz README.md
-   mv oc kubectl openshift-install /usr/local/
-   mv govc_linux_amd64 /usr/local/govc
-   dnf install -y dnf-plugins-core
-   dnf config-manager --add-repo https://rpm.releases.hashicorp.com/$release/hashicorp.repo
-   dnf config-manager --add-repo https://rpm.releases.hashicorp.com/$release/hashicorp.repo -y
-  ```
+We need to install govc client, oc client and ocp installer and Terraform. This is how we proceed
+```bash
+wget https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest-4.7/openshift-client-linux.tar.gz
+wget https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest-4.7/openshift-install-linux.tar.gz
+wget https://github.com/vmware/govmomi/releases/download/v0.24.0/govc_linux_amd64.gz
+tar zxvf openshift-client-linux.tar.gz
+tar zxvf openshift-install-linux.tar.gz
+gunzip govc_linux_amd64.gz
+rm -f *gz README.md
+mv oc kubectl openshift-install /usr/local/
+mv govc_linux_amd64 /usr/local/govc
+dnf install -y dnf-plugins-core
+dnf config-manager --add-repo https://rpm.releases.hashicorp.com/$release/hashicorp.repo
+dnf config-manager --add-repo https://rpm.releases.hashicorp.com/$release/hashicorp.repo -y
+```
 
-## Quickstart
+### QuickStart
 Modify install-config.yaml to fit your env and then:
 
 If using govc do
@@ -64,8 +64,8 @@ sh deploy-with-terraform.sh
 ```
 
 
-## Automating with govc
-## To deploy OCP 4.7 on Vsphere with StaticIP we need to:
+## Automating with govc:
+
 ### Export variables for govc (modify according to your env)
 
 ```bash
