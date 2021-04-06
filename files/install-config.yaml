@@ -1,0 +1,22 @@
+apiVersion: v1
+baseDomain: lab.local
+compute:
+- hyperthreading: Enabled
+  name: worker
+  replicas: 2
+controlPlane:
+  hyperthreading: Enabled
+  name: master
+  replicas: 3
+metadata:
+  name: vmware
+platform:
+  vsphere:
+    vcenter: 192.168.124.3                     #####modiify to fit ur environment
+    username: administrator@vsphere.local
+    password: passwd
+    datacenter: Datacenter
+    defaultDatastore: datastore1
+pullSecret: 'paste pullSecret here'
+sshKey: |
+  PASTE PUB SSH KEY HERE

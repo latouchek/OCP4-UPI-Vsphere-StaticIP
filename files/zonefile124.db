@@ -1,0 +1,37 @@
+@   IN  SOA     dns.vmware.lab.local. root.vmware.lab.local. (
+                                                1001    ;Serial
+                                                3H      ;Refresh
+                                                15M     ;Retry
+                                                1W      ;Expire
+                                                1D      ;Minimum TTL
+                                                )
+
+;Name Server Information
+@      IN  NS      dns.vmware.lab.local.
+
+;IP address of Name Server
+dns IN  A      192.168.124.1
+
+;A - Record HostName To IP Address
+ocp4-master1     IN  A      192.168.124.7
+ocp4-master2     IN  A      192.168.124.8
+ocp4-master3     IN  A      192.168.124.9
+ocp4-worker1	 IN  A      192.168.124.10
+ocp4-worker2	 IN  A      192.168.124.11
+ocp4-worker3	 IN  A      192.168.124.12
+ocp4-bootstrap   IN  A      192.168.124.20
+
+api		 IN  A      192.168.124.1
+api-int		 IN  A      192.168.124.1
+
+;Wildcard Entry for apps
+
+*.apps.vmware.lab.local. 300 IN  A   192.168.124.1
+
+etcd-0	IN  A 192.168.124.7
+etcd-1	IN  A 192.168.124.8
+etcd-2	IN  A 192.168.124.9
+
+_etcd-server-ssl._tcp.vmware.lab.local  86400 IN    SRV 0        10     2380 etcd-0.vmware.lab.local.
+_etcd-server-ssl._tcp.vmware.lab.local  86400 IN    SRV 0        10     2380 etcd-1.vmware.lab.local.
+_etcd-server-ssl._tcp.vmware.lab.local  86400 IN    SRV 0        10     2380 etcd-2.vmware.lab.local.
