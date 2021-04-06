@@ -65,8 +65,8 @@ sh deploy-with-terraform.sh
 
 
 ## Automating with govc
-* To deploy OCP 4.7 on Vsphere with StaticIP we need to:
-* Export variables for govc (modify according to your env)
+## To deploy OCP 4.7 on Vsphere with StaticIP we need to:
+### Export variables for govc (modify according to your env)
 
 ```bash
 export OCP_RELEASE="4.7.4"
@@ -106,7 +106,7 @@ export ocp_net_mask="255.255.255.0"
 export ocp_net_dns="192.168.124.235"
 
 ```
-## Create ignition files
+### Create ignition files
 
 Because bootstrap ignition is too big, it needs to be placed on a webserver and downloaded during the first boot. To acheve that, we create bootstrap-append.ign that points to the right file
  ```bash
@@ -138,7 +138,7 @@ Because bootstrap ignition is too big, it needs to be placed on a webserver and 
 
  ```
 
- ## Prepare CoreOS template
+ ### Prepare CoreOS template
 
  Before downloading the ova we create coreos.json to modify Network mapping (Make sure GOVC_NETWORK is properly defined )
 
@@ -252,7 +252,7 @@ govc vm.disk.change -vm ${worker_name}00.${CLUSTER_DOMAIN} -size 120GB
 govc vm.disk.change -vm ${worker_name}01.${CLUSTER_DOMAIN} -size 120GB
 govc vm.disk.change -vm ${worker_name}02.${CLUSTER_DOMAIN} -size 120GB
 ```
-## Time to start the nodes:
+### Time to start the nodes:
 ```bash
 govc vm.power -on=true bootstrap
 govc vm.power -on=true ${master_name}00.${CLUSTER_DOMAIN}
@@ -262,7 +262,7 @@ govc vm.power -on=true ${worker_name}00.${CLUSTER_DOMAIN}
 govc vm.power -on=true ${worker_name}01.${CLUSTER_DOMAIN}
 govc vm.power -on=true ${worker_name}02.${CLUSTER_DOMAIN}
 ```
-## Wait for the installation to complete
+### Wait for the installation to complete
 
 ```bash
 openshift-install --dir=openshift-install wait-for bootstrap-complete
