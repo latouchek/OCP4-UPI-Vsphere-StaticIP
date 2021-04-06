@@ -40,28 +40,6 @@ dnf config-manager --add-repo https://rpm.releases.hashicorp.com/$release/hashic
 dnf config-manager --add-repo https://rpm.releases.hashicorp.com/$release/hashicorp.repo -y
 ```
 
-### QuickStart
-Modify install-config.yaml to fit your env and then:
-
-If using govc do
-```bash
-git clone https://github.com/latouchek/OCP4-UPI-Vsphere-StaticIP.git  OCP4
-mkdir deploy-OCP4
-cd deploy-OCP4
-cp ../OCP4/scripts/deploy-with-govc.sh .
-cp ../OCP4/files/install-config.yaml .
-sh deploy-with-govc.sh
-```
-If using Terraform do
-```bash
-git clone https://github.com/latouchek/OCP4-UPI-Vsphere-StaticIP.git OCP4
-mkdir deploy-OCP4
-cp -r OCP4/terraform/ deploy-OCP4/
-cd deploy-OCP4
-cp ../OCP4/scripts/deploy-with-terraform.sh .
-cp ../OCP4/files/install-config.yaml .
-sh deploy-with-terraform.sh
-```
 
 
 ## Automating with govc:
