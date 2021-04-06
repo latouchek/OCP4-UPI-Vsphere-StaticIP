@@ -1,10 +1,10 @@
-
- provider "vsphere" {
-  user           = "Administrator@vsphere.local"
-  password       = "password"
-  vsphere_server = "192.168.124.3"
+provider "vsphere" {
+  user           = var.vsphere_user
+  password       = var.vsphere_password
+  vsphere_server = var.vsphere_server
   allow_unverified_ssl = true
 }
+
 
 # Data Sources
 data "vsphere_datacenter" "dc" {
@@ -40,7 +40,7 @@ data "vsphere_virtual_machine" "coreostemplate" {
   datacenter_id = data.vsphere_datacenter.dc.id
 }
 
- # ####Masters#####
+ ###coreostemplate###
  resource "vsphere_virtual_machine" "coreostemplate" {
    name             = "coreostemplate"
    resource_pool_id = data.vsphere_resource_pool.pool.id

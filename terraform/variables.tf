@@ -1,4 +1,15 @@
-
+variable "vsphere_user" {
+  type    = string
+  default = "Administrator@vsphere.local"
+}
+variable "vsphere_password" {
+  type    = string
+  default = "password"
+}
+variable "vsphere_server" {
+  type    = string
+  default = "192.168.124.3"
+}
 variable "vmware_ova_host" {
   type    = string
   default = "192.168.124.2"

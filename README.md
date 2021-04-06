@@ -37,11 +37,11 @@ mv oc kubectl openshift-install /usr/local/
 mv govc_linux_amd64 /usr/local/govc
 dnf install -y dnf-plugins-core
 dnf config-manager --add-repo https://rpm.releases.hashicorp.com/$release/hashicorp.repo
-dnf config-manager --add-repo https://rpm.releases.hashicorp.com/$release/hashicorp.repo -y
+dnf install terraform -y
 ```
 
 
-
+## Part I
 ## Automating with govc:
 
 ### Export variables for govc (modify according to your env)
@@ -263,6 +263,69 @@ for csr in $(oc -n openshift-machine-api get csr | awk '/Pending/ {print $1}'); 
 openshift-install --dir=openshift-install wait-for install-complete --log-level debug       
 
 ```
-
+## Part II
 ## Automating with Terraform
- * To be continued
+With terraform we will create all the objects we need (templates and VMs) in a single piece of code. If we want to scale our cluster we'll just have to modify one variable value and rerun terraform to modify the state of our cluster. Before proceeding, please modify **variables.tf** and **install-config.yaml** according to your needs and place it in the **terraform** folder
+### Create ignition files
+
+
+ ```bash
+ cd terraform
+ rm -f /var/www/html/ignition/*.ign
+ rm -rf ${MYPATH}/openshift-install
+ rm -rf ~/.kube
+ mkdir ${MYPATH}/openshift-install
+ mkdir ~/.kube
+ cp install-config.yaml ${MYPATH}/openshift-install/install-config.yaml
+ cat > ${MYPATH}/openshift-install/bootstrap-append.ign <<EOF
+ {
+   "ignition": {
+     "config": {
+       "merge": [
+       {
+         "source": "http://${HTTP_SERVER}:8080/ignition/bootstrap.ign"
+       }
+       ]
+     },
+     "version": "3.1.0"
+   }
+ }
+ EOF
+ openshift-install create ignition-configs --dir  openshift-install --log-level debug
+ cp ${MYPATH}/openshift-install/*.ign /var/www/html/ignition/
+ chmod o+r /var/www/html/ignition/*.ign
+ restorecon -vR /var/www/html/
+ cp ${MYPATH}/openshift-install/auth/kubeconfig ~/.kube/config
+
+ ```
+### Create the cluster
+```bash
+terraform init
+terraform plan
+terraform apply -auto-approve
+```
+
+### Wait for installation to complete
+
+```bash
+
+openshift-install --dir=openshift-install wait-for bootstrap-complete
+openshift-install --dir=openshift-install wait-for bootstrap-complete > /tmp/bootstrap-test 2>&1
+grep safe /tmp/bootstrap-test > /dev/null 2>&1
+if [ "$?" -ne 0 ]
+then
+	echo -e "\n\n\nERROR: Bootstrap did not complete in time!"
+	echo "Your environment (CPU or network bandwidth) might be"
+	echo "too slow. Continue by hand or execute cleanup.sh and"
+	echo "start all over again."
+	exit 1
+fi
+echo -e "\n\n[INFO] Completing the installation and approving workers...\n"
+for csr in $(oc -n openshift-machine-api get csr | awk '/Pending/ {print $1}'); do oc adm certificate approve $csr;done
+sleep 180
+
+for csr in $(oc -n openshift-machine-api get csr | awk '/Pending/ {print $1}'); do oc adm certificate approve $csr;done
+
+openshift-install --dir=openshift-install wait-for install-complete --log-level debug
+
+```
