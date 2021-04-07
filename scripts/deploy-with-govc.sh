@@ -96,6 +96,7 @@ wget wget https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/4.7/l
 
 govc import.ova -options=coreos.json -name coreostemplate rhcos-vmware.x86_64.ova
 govc vm.markastemplate coreostemplate
+govc vm.clone -vm coreostemplate  -on=false  bootstrap
 bootstrap=$(cat openshift-install/bootstrap-append.ign | base64 -w0)
 govc vm.change -e="guestinfo.ignition.config.data=${bootstrap}" -vm=${bootstrap_name}
 govc vm.change -e="guestinfo.ignition.config.data.encoding=base64" -vm=${bootstrap_name}
@@ -138,7 +139,7 @@ govc vm.change -e="guestinfo.afterburn.initrd.network-kargs=ip=${master1_ip}::${
 govc vm.change -e="guestinfo.afterburn.initrd.network-kargs=ip=${master2_ip}::${ocp_net_gw}:${ocp_net_mask}:${master_name}01.${CLUSTER_DOMAIN}:ens192:off nameserver=${ocp_net_dns}" -vm=${master_name}01.${CLUSTER_DOMAIN}
 govc vm.change -e="guestinfo.afterburn.initrd.network-kargs=ip=${master3_ip}::${ocp_net_gw}:${ocp_net_mask}:${master_name}02.${CLUSTER_DOMAIN}:ens192:off nameserver=${ocp_net_dns}" -vm=${master_name}02.${CLUSTER_DOMAIN}
 
-worker=$(cat /var/opsh/ocpddc-test/worker.ign | base64 -w0)
+worker=$(cat openshift-install/worker.ign | base64 -w0)
 govc vm.clone -vm coreostemplate  -on=false  ${worker_name}00.${CLUSTER_DOMAIN}
 govc vm.clone -vm coreostemplate  -on=false  ${worker_name}01.${CLUSTER_DOMAIN}
 # govc vm.clone -vm coreostemplate  -on=false  ${worker_name}02.${CLUSTER_DOMAIN}

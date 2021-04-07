@@ -156,7 +156,7 @@ We can now download the image, apply the changes, import, tag the resulting VM a
 wget https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/4.7/latest/rhcos-vmware.x86_64.ova
 govc import.ova -options=coreos.json -name coreostemplate rhcos-vmware.x86_64.ova
 govc vm.markastemplate coreostemplate
-govc vm.clone -vm coreos47  -on=false  bootstrap
+govc vm.clone -vm coreostemplate  -on=false  bootstrap
 ```
 IGN files need to be provided to Vsphere instance through guestinfo.ignition.config.data. We need to encode it in base64 before anything and change the previously created bootstrap VM:
 ```bash
@@ -265,7 +265,26 @@ openshift-install --dir=openshift-install wait-for install-complete --log-level 
 ```
 ## Part II
 ## Automating with Terraform
-With terraform we will create all the objects we need (templates and VMs) in a single piece of code. If we want to scale our cluster we'll just have to modify one variable value and rerun terraform to modify the state of our cluster. Before proceeding, please modify **variables.tf** and **install-config.yaml** according to your needs and place it in the **terraform** folder
+With terraform we will create all the objects we need (templates and VMs) in a single piece of code. If we want to scale our cluster we'll just have to modify one variable value and rerun terraform to modify the state of our cluster. Before proceeding, please modify **variables.tf** and **install-config.yaml** according to your needs and place it in the **terraform** folder.
+Also we need to export **govc** variables since terraform needs it during the template creation
+
+```bash
+export OCP_RELEASE="4.7.4"
+export CLUSTER_DOMAIN="vmware.lab.local"
+export GOVC_URL='192.168.124.3'
+export GOVC_USERNAME='administrator@vsphere.local'
+export GOVC_PASSWORD='password'
+export GOVC_INSECURE=1
+export GOVC_NETWORK='VM Network'
+export VMWARE_SWITCH='DSwitch'
+export GOVC_DATASTORE='datastore1'
+export GOVC_DATACENTER='Datacenter'
+export GOVC_RESOURCE_POOL=[VSPHERE_CLUSTER]/Resources  ####default pool
+export MYPATH=$(pwd)
+export HTTP_SERVER="192.168.124.1"
+```
+
+
 ### Create ignition files
 
 
@@ -329,3 +348,26 @@ for csr in $(oc -n openshift-machine-api get csr | awk '/Pending/ {print $1}'); 
 openshift-install --dir=openshift-install wait-for install-complete --log-level debug
 
 ```
+If the installation times out you might need to type the following command again:
+
+```bash
+openshift-install --dir=openshift-install wait-for install-complete --log-level debug
+```
+
+Result should look like this:
+
+```bash
+[root@esxi-bastion terraform]# openshift-install --dir=openshift-install wait-for install-complete --log-level debug
+DEBUG OpenShift Installer 4.7.4                    
+.
+.
+.
+DEBUG Route found in openshift-console namespace: console
+DEBUG OpenShift console route is admitted          
+INFO Install complete!                            
+INFO To access the cluster as the system:admin user when using 'oc', run 'export KUBECONFIG=/root/terraform-vsphere-ignitiontest/openshift-install/auth/kubeconfig'
+INFO Access the OpenShift web-console here: https://console-openshift-console.apps.vmware.lab.local
+INFO Login to the console with user: "kubeadmin", and password: "TkwHE-GWu5U-rAEsA-FrgqQ"
+```
+### How does it work?
+To be continued

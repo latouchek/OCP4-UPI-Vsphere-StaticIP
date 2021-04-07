@@ -12,7 +12,7 @@ metadata:
   name: vmware
 platform:
   vsphere:
-    vcenter: 192.168.124.3                     #####modiify to fit ur environment
+    vcenter: 192.168.124.3                     #####modify to fit ur environment
     username: administrator@vsphere.local
     password: passwd
     datacenter: Datacenter
