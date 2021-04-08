@@ -27,7 +27,6 @@ data "vsphere_compute_cluster" "cluster" {
 
 data "vsphere_network" "network" {
   name          = "VM Network"
-  #name          = ""
   datacenter_id = "${data.vsphere_datacenter.dc.id}"
 }
 data "vsphere_host" "host" {
@@ -76,9 +75,11 @@ data "vsphere_virtual_machine" "coreostemplate" {
     }
   }
  }
+
 data "local_file" "bootstrap_vm_ignition" {
   filename   = "${var.generationDir}/bootstrap-append.ign"
 }
+
 resource "vsphere_virtual_machine" "bootstrapVM" {
   name             = "${var.cluster_name}-bootstrap"
   resource_pool_id = data.vsphere_compute_cluster.cluster.resource_pool_id
@@ -122,7 +123,7 @@ data "local_file" "master_vm_ignition" {
   filename   = "${var.generationDir}/master.ign"
 }
 resource "vsphere_virtual_machine" "masterVMs" {
-  depends_on = [data.vsphere_virtual_machine.coreostemplate]
+  depends_on = [vsphere_virtual_machine.bootstrapVM]
   count      = var.master_count
 
   name             = "${var.cluster_name}-master0${count.index}"
@@ -169,7 +170,7 @@ data "local_file" "worker_vm_ignition" {
   filename   = "${var.generationDir}/worker.ign"
 }
 resource "vsphere_virtual_machine" "workerVMs" {
-  depends_on = [data.vsphere_virtual_machine.coreostemplate]
+  depends_on = [vsphere_virtual_machine.masterVMs]
   count      = var.worker_count
 
   name             = "${var.cluster_name}-worker0${count.index}"

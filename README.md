@@ -370,4 +370,3 @@ INFO Access the OpenShift web-console here: https://console-openshift-console.ap
 INFO Login to the console with user: "kubeadmin", and password: "TkwHE-GWu5U-rAEsA-FrgqQ"
 ```
 ### How does it work?
-To be continued
