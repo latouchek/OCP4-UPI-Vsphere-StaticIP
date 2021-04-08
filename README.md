@@ -370,3 +370,106 @@ INFO Access the OpenShift web-console here: https://console-openshift-console.ap
 INFO Login to the console with user: "kubeadmin", and password: "TkwHE-GWu5U-rAEsA-FrgqQ"
 ```
 ### How does it work?
+
+Just like with govc we need to create a template and clone it to create Bootstrap, Masters and Workers in that order and inject ignitions and network setup.
+
+  * We create a template to clone from as shown by the terraform block bellow.
+
+  The **local-exec** **provisioner** is needed to actualy stop the created VM so it can be used as a **template**.
+
+  In this case we use **local_ovf_path** and thus have to download the ova beforehand but **remote_ovf_url** works as well for a more dynamic approach.
+
+  Terraform  **ovf_network_map** support capabilities allows us to set  the right Network for this Template.
+```terraform
+ resource "vsphere_virtual_machine" "coreostemplate" {
+   name             = "coreostemplate"
+   resource_pool_id = data.vsphere_resource_pool.pool.id
+   datastore_id     = data.vsphere_datastore.datastore.id
+   datacenter_id    = data.vsphere_datacenter.dc.id
+   host_system_id   = data.vsphere_host.host.id
+   num_cpus = 2
+   memory   = 4096
+   guest_id = "coreos64Guest"
+   wait_for_guest_net_timeout  = 0
+   wait_for_guest_ip_timeout   = 0
+   wait_for_guest_net_routable = false
+   enable_disk_uuid  = true
+   network_interface {
+     network_id = data.vsphere_network.network.id
+   }
+   ovf_deploy {
+     #remote_ovf_url       = "https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/4.7/latest/rhcos-vmware.x86_64.ova"
+     local_ovf_path       = "rhcos-vmware.x86_64.ova"  
+     disk_provisioning    = "thin"
+     ovf_network_map = {
+       "VM Network" = data.vsphere_network.network.id
+   }
+  }
+  provisioner "local-exec" {
+    command = "govc vm.power -off=true coreostemplate && sleep 10"
+
+    environment = {
+      GOVC_URL      = var.vsphere_server
+      GOVC_USERNAME = var.vsphere_user
+      GOVC_PASSWORD = var.vsphere_password
+      GOVC_INSECURE = "true"
+    }
+  }
+ }
+```
+
+  * Let's take a look at the **Masters** definition block (Some lines were removed for better visibility)
+
+ Workers nodes specs are described in **variables.tf** and we use a **'Count'** loop to create the Nodes.
+
+ To feed **ignition** to our VMs we create a data source read from local file  **master.ign**
+
+ ```terraform
+data "local_file" "master_vm_ignition" {
+  filename   = "${var.generationDir}/master.ign"
+}
+```
+We defines the  **masterVMs** **vsphere_virtual_machine**  resource that depends on the **bootstrapVM** resource  and we use the coreOS template created previously with the **clone** block.
+```terraform
+resource "vsphere_virtual_machine" "masterVMs" {
+  depends_on = [vsphere_virtual_machine.bootstrapVM]
+  count      = var.master_count
+
+  name             = "${var.cluster_name}-master0${count.index}"
+.
+.
+.
+.
+
+  clone {
+    template_uuid = data.vsphere_virtual_machine.coreostemplate.id
+  }
+  ```
+  To inject ignition data and metadata into the VM we need to use the **extra_config block**. Unfortunately and as stated in Fedora  CoreOS Documentation, **vApp** Property does not work in this scenario. Syntax is very similar to what was done with govc.
+```terraform
+  extra_config = {
+    "guestinfo.ignition.config.data"           = base64encode(data.local_file.master_vm_ignition.content)
+    "guestinfo.ignition.config.data.encoding"  = "base64"
+    "guestinfo.hostname"                       = "${var.cluster_name}-master${count.index}"
+    "guestinfo.afterburn.initrd.network-kargs" = lookup(var.master_network_config, "master_${count.index}_type") != "dhcp" ? "ip=${lookup(var.master_network_config, "master_${count.index}_ip")}:${lookup(var.master_network_config, "master_${count.index}_server_id")}:${lookup(var.master_network_config, "master_${count.index}_gateway")}:${lookup(var.master_network_config, "master_${count.index}_subnet")}:${var.cluster_name}-master${count.index}:${lookup(var.master_network_config, "master_${count.index}_interface")}:off nameserver=${lookup(var.bootstrap_vm_network_config, "dns")}" : "ip=::::${var.cluster_name}-master${count.index}:ens192:on"
+  }
+}
+```
+
+* Workers nodes are created the exact same way except we changed the resource we want to use with **depends_on** meta-argument. That way we make sure Workers built after Masters.
+```terraform
+resource "vsphere_virtual_machine" "workerVMs" {
+  depends_on = [vsphere_virtual_machine.masterVMs]
+  .
+  .
+  .  
+}
+```
+
+
+### Thank you for reading
+* References
+  * https://github.com/luisarizmendi/ocp-vsphere-staticip
+  * https://registry.terraform.io/providers/hashicorp/vsphere/latest/docs
+  * https://docs.fedoraproject.org/en-US/fedora-coreos/provisioning-vmware/
+  * https://www.virtuallyghetto.com/2020/06/full-ova-ovf-property-support-coming-to-terraform-provider-for-vsphere.html
