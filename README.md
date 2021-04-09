@@ -33,8 +33,8 @@ tar zxvf openshift-client-linux.tar.gz
 tar zxvf openshift-install-linux.tar.gz
 gunzip govc_linux_amd64.gz
 rm -f *gz README.md
-mv oc kubectl openshift-install /usr/local/
-mv govc_linux_amd64 /usr/local/govc
+mv oc kubectl openshift-install /usr/local/bin/
+mv govc_linux_amd64 /usr/local/bin/govc
 dnf install -y dnf-plugins-core
 dnf config-manager --add-repo https://rpm.releases.hashicorp.com/$release/hashicorp.repo
 dnf install terraform -y
