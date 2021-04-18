@@ -10,6 +10,10 @@ variable "vsphere_server" {
   type    = string
   default = "192.168.124.3"
 }
+variable "vsphere_net" {
+  type    = string
+  default = "VM Network"
+}
 variable "vmware_ova_host" {
   type    = string
   default = "192.168.124.2"

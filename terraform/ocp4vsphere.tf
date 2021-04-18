@@ -12,7 +12,7 @@ data "vsphere_datacenter" "dc" {
 }
 data "vsphere_resource_pool" "pool" {
   # If you haven't resource pool, put "Resources" after cluster name
-  name          = "moncluster/Resources"
+  name          = "mycluster/Resources"
   datacenter_id = data.vsphere_datacenter.dc.id
 }
 data "vsphere_datastore" "datastore" {
@@ -21,12 +21,12 @@ data "vsphere_datastore" "datastore" {
 }
 
 data "vsphere_compute_cluster" "cluster" {
-  name          = "moncluster"
+  name          = "mycluster"
   datacenter_id = "${data.vsphere_datacenter.dc.id}"
 }
 
 data "vsphere_network" "network" {
-  name          = "VM Network"
+  name = var.vsphere_net
   datacenter_id = "${data.vsphere_datacenter.dc.id}"
 }
 data "vsphere_host" "host" {
