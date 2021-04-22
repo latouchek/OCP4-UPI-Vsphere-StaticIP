@@ -1,5 +1,5 @@
 
-# Automating OCP 4.7 UPI Installation on Vsphere with Static IPs
+# How to automate OCP 4.7 UPI Installation on Vsphere and assign  Static IPs to Nodes 
 
 
 
